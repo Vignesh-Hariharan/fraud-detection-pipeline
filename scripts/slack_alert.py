@@ -51,9 +51,10 @@ def get_high_risk_transactions(config: Dict[str, Any], limit: int = 10) -> List[
             transaction_timestamp,
             transaction_amount,
             fraud_probability,
-            risk_level
-        FROM FRAUD_DETECTION_DB.MARTS_MARTS.HIGH_RISK_TRANSACTIONS
-        WHERE risk_level = 'CRITICAL'
+            risk_category
+        FROM FRAUD_DETECTION_DB.MARTS.FCT_FRAUD_PREDICTIONS
+        WHERE risk_category = 'high_risk'
+          AND fraud_probability >= 0.9
         ORDER BY fraud_probability DESC
         LIMIT {}
         """.format(limit)

@@ -129,30 +129,30 @@ def load_to_snowflake(df: pd.DataFrame, config: Dict[str, Any]) -> int:
         
         data = [
             (
-                str(row['trans_num']),
-                str(row['trans_date_trans_time']),
-                int(row['cc_num']) if pd.notna(row['cc_num']) else None,
-                str(row['merchant']),
-                str(row['category']),
-                float(row['amt']) if pd.notna(row['amt']) else None,
-                str(row['first']),
-                str(row['last']),
-                str(row['gender']),
-                str(row['street']),
-                str(row['city']),
-                str(row['state']),
-                int(row['zip']) if pd.notna(row['zip']) else None,
-                float(row['lat']) if pd.notna(row['lat']) else None,
-                float(row['long']) if pd.notna(row['long']) else None,
-                int(row['city_pop']) if pd.notna(row['city_pop']) else None,
-                str(row['job']),
-                str(row['dob']),
-                int(row['unix_time']) if pd.notna(row['unix_time']) else None,
-                float(row['merch_lat']) if pd.notna(row['merch_lat']) else None,
-                float(row['merch_long']) if pd.notna(row['merch_long']) else None,
-                int(row['is_fraud']) if pd.notna(row['is_fraud']) else None
+                str(row.trans_num),
+                str(row.trans_date_trans_time),
+                int(row.cc_num) if pd.notna(row.cc_num) else None,
+                str(row.merchant),
+                str(row.category),
+                float(row.amt) if pd.notna(row.amt) else None,
+                str(row.first),
+                str(row.last),
+                str(row.gender),
+                str(row.street),
+                str(row.city),
+                str(row.state),
+                int(row.zip) if pd.notna(row.zip) else None,
+                float(row.lat) if pd.notna(row.lat) else None,
+                float(row.long) if pd.notna(row.long) else None,
+                int(row.city_pop) if pd.notna(row.city_pop) else None,
+                str(row.job),
+                str(row.dob),
+                int(row.unix_time) if pd.notna(row.unix_time) else None,
+                float(row.merch_lat) if pd.notna(row.merch_lat) else None,
+                float(row.merch_long) if pd.notna(row.merch_long) else None,
+                int(row.is_fraud) if pd.notna(row.is_fraud) else None
             )
-            for _, row in df.iterrows()
+            for row in df.itertuples(index=False)
         ]
         
         # Bulk insert in batches

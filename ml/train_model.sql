@@ -2,11 +2,11 @@
 -- Split by time: train on data before Oct 2020
 
 USE DATABASE FRAUD_DETECTION_DB;
-USE SCHEMA MARTS_MARTS;
+USE SCHEMA MARTS;
 
 -- Create training dataset with temporal split
 CREATE OR REPLACE TABLE FRAUD_TRAINING_DATA AS
-SELECT 
+SELECT
     transaction_id,
     customer_id,
     transaction_timestamp,
@@ -26,7 +26,7 @@ SELECT
     is_late_night,
     account_age_days,
     is_fraud
-FROM MARTS_MARTS.FCT_FRAUD_FEATURES
+FROM MARTS.FCT_FRAUD_FEATURES
 WHERE TRANSACTION_TIMESTAMP < '2020-10-01'
   AND IS_FRAUD IS NOT NULL;
 
@@ -41,7 +41,7 @@ GROUP BY is_fraud;
 -- Train classification model
 -- Cortex handles the imbalanced dataset automatically
 CREATE OR REPLACE SNOWFLAKE.ML.CLASSIFICATION FRAUD_MODEL(
-    INPUT_DATA => SYSTEM$REFERENCE('TABLE', 'MARTS_MARTS.FRAUD_TRAINING_DATA'),
+    INPUT_DATA => SYSTEM$REFERENCE('TABLE', 'MARTS.FRAUD_TRAINING_DATA'),
     TARGET_COLNAME => 'IS_FRAUD',
     CONFIG_OBJECT => {
         'evaluate': TRUE,
