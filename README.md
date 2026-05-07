@@ -89,8 +89,8 @@ See `docs/FEATURE_NOTES.md` for rationale and implementation details.
 ### 2. Installation
 
 ```bash
-git clone <your-repo-url>
-cd Fraud_detection_pipeline
+git clone https://github.com/Vignesh-Hariharan/fraud-detection-pipeline.git
+cd fraud-detection-pipeline
 
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
