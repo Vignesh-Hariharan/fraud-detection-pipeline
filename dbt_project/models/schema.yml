@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: Cleaned and standardized transaction data from raw layer
+    columns:
+      - name: transaction_id
+        description: Unique transaction identifier
+        tests:
+          - unique
+          - not_null
+      
+      - name: customer_id
+        description: Customer credit card number identifier
+        tests:
+          - not_null
+      
+      - name: transaction_amount
+        description: Transaction amount in USD
+        tests:
+          - not_null
+      
+      - name: transaction_timestamp
+        description: When the transaction occurred
+        tests:
+          - not_null
+
+  - name: int_features
+    description: Transactions with engineered features for fraud detection
+    columns:
+      - name: transaction_id
+        description: Unique transaction identifier
+        tests:
+          - unique
+          - not_null
+      
+      - name: transaction_amount
+        description: Transaction amount in USD
+        tests:
+          - not_null
+
+  - name: fct_fraud_features
+    description: Final feature set for model training and scoring
+    columns:
+      - name: transaction_id
+        description: Unique transaction identifier
+        tests:
+          - unique
+          - not_null
+      
+      - name: customer_id
+        description: Customer identifier
+        tests:
+          - not_null
+      
+      - name: transaction_amount
+        description: Transaction amount in USD
+        tests:
+          - not_null
+      
+      - name: is_fraud
+        description: Actual fraud label
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fct_fraud_predictions
+    description: Model predictions with risk scores
+    columns:
+      - name: transaction_id
+        description: Unique transaction identifier
+        tests:
+          - unique
+          - not_null
+      
+      - name: fraud_probability
+        description: Model probability score for fraud
+      
+      - name: risk_category
+        description: Risk level categorization
+
+tests:
+  - name: no_negative_amounts
+    description: Transaction amounts should be non-negative
+    sql: |
+      SELECT transaction_id
+      FROM {{ ref('fct_fraud_features') }}
+      WHERE transaction_amount < 0
+

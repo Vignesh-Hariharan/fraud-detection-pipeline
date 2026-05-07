@@ -1,0 +1,10 @@
+snowflake-connector-python==3.5.0
+pandas==2.1.4
+pyyaml==6.0.1
+requests==2.31.0
+dbt-core==1.7.4
+dbt-snowflake==1.7.1
+python-dotenv==1.0.0
+pytest==7.4.3
+kaggle==1.5.16
+

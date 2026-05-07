@@ -1,0 +1,78 @@
+# Configs with sensitive data
+config/*.yml
+!config/*.yml.example
+
+# Environment variables
+.env
+.env.local
+
+# Python
+venv/
+env/
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Data files (except sample)
+data/*.csv
+data/*.zip
+!data/sample_transactions.csv
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+dbt_project/profiles.yml
+!dbt_project/profiles.yml.example
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Kaggle
+.kaggle/
+
+# Private learning/reference docs (keep local, don't push to GitHub)
+NOTES_FOR_ME.md
+docs/SETUP_GUIDE.md
+docs/FUTURE_WORK.md
+docs/MODEL_ITERATIONS.md
+EXECUTION_CHECKLIST.md
+PROJECT_SUMMARY.md
+QUICK_START.md
+
+# macOS
+.DS_Store
+docs/images/.DS_Store
+

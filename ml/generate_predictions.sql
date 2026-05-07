@@ -1,0 +1,41 @@
+-- Generate predictions on test set (October 2020 onwards)
+-- Assigns risk categories based on fraud probability thresholds
+
+USE DATABASE FRAUD_DETECTION_DB;
+USE SCHEMA MARTS;
+
+CREATE OR REPLACE TABLE FCT_FRAUD_PREDICTIONS AS
+WITH test_data AS (
+    SELECT *
+    FROM MARTS.FCT_FRAUD_FEATURES
+    WHERE TRANSACTION_TIMESTAMP >= '2020-10-01'
+),
+
+predictions AS (
+    SELECT
+        TRANSACTION_ID,
+        CUSTOMER_ID,
+        TRANSACTION_TIMESTAMP,
+        TRANSACTION_AMOUNT,
+        IS_FRAUD AS ACTUAL_FRAUD,
+        FRAUD_MODEL!PREDICT(OBJECT_CONSTRUCT(*))['prediction']::INTEGER AS PREDICTED_FRAUD,
+        FRAUD_MODEL!PREDICT(OBJECT_CONSTRUCT(*))['probability'][1]::FLOAT AS FRAUD_PROBABILITY
+    FROM test_data
+)
+
+SELECT
+    TRANSACTION_ID,
+    CUSTOMER_ID,
+    TRANSACTION_TIMESTAMP,
+    TRANSACTION_AMOUNT,
+    ACTUAL_FRAUD,
+    PREDICTED_FRAUD,
+    FRAUD_PROBABILITY,
+    CASE
+        WHEN FRAUD_PROBABILITY > 0.80 THEN 'high_risk'
+        WHEN FRAUD_PROBABILITY > 0.50 THEN 'medium_risk'
+        ELSE 'low_risk'
+    END AS RISK_CATEGORY,
+    FALSE AS ALERT_SENT
+FROM predictions;
+

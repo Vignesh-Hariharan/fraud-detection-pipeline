@@ -1,0 +1,9 @@
+snowflake:
+  account: YOUR_ACCOUNT_IDENTIFIER
+  user: YOUR_USERNAME
+  password: YOUR_PASSWORD
+  warehouse: COMPUTE_WH
+  database: FRAUD_DETECTION_DB
+  schema: RAW
+  role: ACCOUNTADMIN
+

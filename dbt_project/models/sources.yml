@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: raw
+    database: FRAUD_DETECTION_DB
+    schema: RAW
+    tables:
+      - name: transactions
+        description: Raw transaction data loaded from Kaggle fraud detection dataset
+        columns:
+          - name: trans_num
+            description: Unique transaction identifier
+          - name: trans_date_trans_time
+            description: Transaction timestamp
+          - name: cc_num
+            description: Credit card number (customer identifier)
+          - name: amt
+            description: Transaction amount in USD
+          - name: is_fraud
+            description: Fraud label (0=legitimate, 1=fraud)
+
