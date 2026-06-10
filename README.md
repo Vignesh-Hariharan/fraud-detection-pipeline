@@ -4,7 +4,6 @@ An end-to-end ML pipeline for detecting fraudulent credit card transactions usin
 
 ## Project Context
 
-End-to-end ML pipeline for detecting fraudulent credit card transactions. This project demonstrates:
 - Complete data pipeline from raw data to predictions
 - Modern data stack implementation (Snowflake, dbt, Python)
 - ML workflow using Snowflake Cortex
@@ -199,13 +198,13 @@ Model                     Features    Precision    Recall       F1
 BASELINE                  6           82.9%        74.7%        78.6%     (best)
 EXP2 (+ velocity)         9           75.5%        77.2%        76.3%
 EXP3 (+ customer/time)    13          76.9%        80.2%        78.5%
-FULL (all features)       18          74.2%        76.6%        75.4%
+FULL (all features)       15          74.2%        76.6%        75.4%
 
 Best Model: BASELINE (6 features)
 Why: Highest F1 score + simplest (least prone to overfitting)
 ```
 
-**Key Finding**: More features didn't help! The baseline model with only 6 core features outperformed the complex models. This demonstrates:
+**Key Finding**: More features didn't help. The baseline model with only 6 core features outperformed the complex models:
 - Simpler is often better (avoids overfitting)
 - Feature selection matters more than quantity
 - Not all engineered features add value
@@ -328,6 +327,14 @@ This is a portfolio project, not production-ready. Known limitations:
 4. **Simulated data** - patterns may differ from real fraud
 5. **No orchestration** - manual execution or basic scheduling
 6. **Limited testing** - happy path focused
+7. **Feature leakage relative to the time split** - customer aggregates and
+   `merchant_fraud_rate` are computed in dbt over the full dataset before the
+   train/test split, so training rows can see information from the test window
+   (and `merchant_fraud_rate` is derived from the fraud label itself). The
+   training tables also carry ID and timestamp columns that Cortex treats as
+   inputs. A production version would compute these features point-in-time over
+   the training window only and exclude the ID columns. Notably, the leakier
+   full model still scored worse than the 6-feature baseline.
 
 
 ## Security Note
@@ -374,13 +381,9 @@ Priority improvements for production:
 
 ## About
 
-This project demonstrates end-to-end data pipeline development:
-- Data engineering: Loading, transformation, quality checks
-- ML workflow: Training, evaluation, prediction
-- Automation: Alerts and monitoring
-- Modern tools: Snowflake, dbt, Python
-
-Built as a portfolio project to showcase data engineering capabilities.
+Portfolio project covering data engineering (loading, transformation, quality
+checks), the ML workflow (training, evaluation, prediction), and automation
+(alerts and monitoring) on Snowflake, dbt, and Python.
 
 ## License
 

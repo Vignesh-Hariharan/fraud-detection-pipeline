@@ -83,6 +83,10 @@ After initial model training, 5 additional features were added based on performa
 - What percentage of transactions at this merchant were fraud?
 - Simple: `AVG(is_fraud) GROUP BY merchant`
 - Some merchants might be targeted more
+- Caveat: this is computed over the whole dataset, so it leaks the label and
+  the test window into training. It would need a point-in-time calculation
+  (training window only, excluding the current transaction) before any real
+  use - see Limitations in the README
 
 ### Time Pattern
 
