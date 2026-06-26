@@ -104,8 +104,8 @@ def run_dbt_tests() -> bool:
         return True
     
     except subprocess.CalledProcessError as e:
-        logger.warning(f"Some dbt tests failed: {e.stderr}")
-        return True
+        logger.error(f"dbt tests failed: {e.stderr}")
+        return False
 
 
 def generate_predictions(config: dict) -> bool:

@@ -2,7 +2,7 @@
 -- Run this in your Snowflake worksheet
 
 USE DATABASE FRAUD_DETECTION_DB;
-USE SCHEMA MARTS_MARTS;
+USE SCHEMA MARTS;
 
 -- Step 1: Create test dataset (data model hasn't seen during training)
 CREATE OR REPLACE TABLE FRAUD_TEST_DATA AS

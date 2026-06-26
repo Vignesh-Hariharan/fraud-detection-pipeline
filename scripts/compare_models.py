@@ -209,14 +209,14 @@ def main():
             'baseline': {
                 'model_name': 'FRAUD_MODEL_BASELINE',
                 'features': ['transaction_amount', 'customer_avg_amount', 'amount_z_score', 
-                           'hour_of_day', 'merchant_category', 'is_fraud'],
+                           'hour_of_day', 'merchant_category', ],
                 'num_features': 6
             },
             'with_velocity': {
                 'model_name': 'FRAUD_MODEL_EXP2',
                 'features': ['transaction_amount', 'customer_avg_amount', 'amount_z_score',
                            'txns_last_24h', 'txns_last_7d', 'minutes_since_last_txn',
-                           'hour_of_day', 'merchant_category', 'is_fraud'],
+                           'hour_of_day', 'merchant_category', ],
                 'num_features': 9
             },
             'with_customer_time': {
@@ -224,17 +224,16 @@ def main():
                 'features': ['transaction_amount', 'customer_avg_amount', 'amount_z_score',
                            'txns_last_24h', 'txns_last_7d', 'minutes_since_last_txn',
                            'hour_of_day', 'is_weekend', 'is_late_night',
-                           'customer_age', 'account_age_days', 'merchant_category', 'is_fraud'],
+                           'customer_age', 'account_age_days', 'merchant_category', ],
                 'num_features': 13
             },
             'full_features': {
                 'model_name': 'FRAUD_MODEL',
-                'features': ['transaction_id', 'customer_id', 'transaction_timestamp',
-                           'transaction_amount', 'customer_avg_amount', 'amount_z_score',
+                'features': ['transaction_amount', 'customer_avg_amount', 'amount_z_score',
                            'txns_last_24h', 'txns_last_7d', 'minutes_since_last_txn',
                            'hour_of_day', 'is_weekend', 'customer_age', 'merchant_category',
                            'is_different_city', 'is_new_max_amount', 'merchant_fraud_rate',
-                           'is_late_night', 'account_age_days', 'is_fraud'],
+                           'is_late_night', 'account_age_days'],
                 'num_features': 15
             }
         }
