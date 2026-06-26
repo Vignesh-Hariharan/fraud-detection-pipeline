@@ -2,12 +2,14 @@
 
 An end-to-end ML pipeline for detecting fraudulent credit card transactions using Snowflake, dbt, and Python.
 
+> **What this project taught me:** More features ≠ better models. The 6-feature baseline outperformed the 15-feature model, and investigating why uncovered real issues: feature leakage from point-in-time aggregation, label-derived inputs, and ID columns fed to the classifier. Those lessons — not the precision score — are the main takeaway here. Details in the [Key Learnings](#key-learnings) section.
+
 ## Project Context
 
-- Complete data pipeline from raw data to predictions
-- Modern data stack implementation (Snowflake, dbt, Python)
-- ML workflow using Snowflake Cortex
-- Automated alerting system
+- Complete data pipeline from raw data to predictions (1.3M Kaggle transactions)
+- Modern data stack: Snowflake, dbt, Python, Snowflake Cortex ML
+- Iterative feature engineering: built in two phases, then compared results
+- Automated Slack alerting for high-risk transactions
 
 ## What This Pipeline Does
 
@@ -298,24 +300,31 @@ This demo uses batch processing on historical data. In production, you would:
 
 ## Key Learnings
 
+### The Main Finding: Why the Simpler Model Won
+
+The 15-feature model underperformed the 6-feature baseline. Investigating why revealed three compounding problems:
+
+1. **Point-in-time leakage** — `customer_avg_amount`, `amount_z_score`, and velocity features were computed in dbt over the *full* dataset before the train/test split. Training rows could therefore see statistics that included future test-window transactions.
+2. **Label-derived input** — `merchant_fraud_rate` is computed directly from the fraud label column across the full dataset. This means the model trained on a variable that already encodes the answer for some rows.
+3. **ID columns passed to Cortex** — training tables included transaction ID and timestamp columns, which Cortex treated as numeric inputs, adding noise.
+
+A production version would compute all aggregations point-in-time over the training window only, exclude ID columns, and compute merchant risk rates on training rows only. These are standard safeguards that this project skipped — and the model results made the gap visible.
+
+**Why this is worth showing:** Catching this kind of leakage after the fact — and being able to explain exactly *why* the simpler model won — demonstrates the diagnostic thinking that matters in production ML work.
+
 ### What Worked
 - **Iterative approach**: Starting simple and adding features incrementally
-- **Time-based split**: Training on older data (before Oct 2020), testing on newer data (Oct 2020+) to see how well it predicts future transactions
+- **Time-based split**: Training on older data (before Oct 2020), testing on newer data (Oct 2020+)
 - **Feature comparison**: Actually measuring which features help vs hurt
-- **Finding the right cutoff**: Testing different confidence levels to decide when to flag a transaction as fraud
-- **dbt for features**: SQL is fast, readable, and testable
-
-### Challenges
-- **Uneven data**: Only 0.17% of transactions are fraud (most are legitimate), making it harder to detect the rare fraud cases
-- **Choosing what to measure**: Researched common fraud patterns and tested them one by one
-- **Precision vs Recall**: Balanced trade-off between false alarms and missed fraud
-- **Snowflake Cortex limits**: Managed ML service with less control than custom models
+- **Finding the right cutoff**: Testing different confidence thresholds for fraud flagging
+- **dbt for features**: SQL-based feature engineering is fast, readable, and testable
 
 ### What I'd Do Differently
+- Compute all aggregations point-in-time using only training-window data
+- Exclude ID and timestamp columns from Cortex inputs
+- Compute `merchant_fraud_rate` from training rows only
 - Test more time windows (6h, 48h, 30d) for velocity features
-- Test which measurements matter most and remove the ones that don't help
-- Test with different date ranges to confirm the model works consistently
-- Add multiple rounds of testing on different data chunks if not using Snowflake Cortex
+- Add multiple evaluation folds rather than a single train/test split
 
 ## Limitations
 
@@ -327,14 +336,7 @@ This is a portfolio project, not production-ready. Known limitations:
 4. **Simulated data** - patterns may differ from real fraud
 5. **No orchestration** - manual execution or basic scheduling
 6. **Limited testing** - happy path focused
-7. **Feature leakage relative to the time split** - customer aggregates and
-   `merchant_fraud_rate` are computed in dbt over the full dataset before the
-   train/test split, so training rows can see information from the test window
-   (and `merchant_fraud_rate` is derived from the fraud label itself). The
-   training tables also carry ID and timestamp columns that Cortex treats as
-   inputs. A production version would compute these features point-in-time over
-   the training window only and exclude the ID columns. Notably, the leakier
-   full model still scored worse than the 6-feature baseline.
+7. **Feature engineering gaps** - see [Key Learnings](#key-learnings) for a full breakdown of the leakage issues discovered and what a production version would do differently.
 
 
 ## Security Note
