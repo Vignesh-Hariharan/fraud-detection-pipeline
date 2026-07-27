@@ -1,5 +1,11 @@
 # Fraud Detection Pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
+[![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8.svg)](https://www.snowflake.com/)
+[![dbt](https://img.shields.io/badge/dbt-FF694B.svg)](https://www.getdbt.com/)
+[![Cortex ML](https://img.shields.io/badge/Snowflake-Cortex%20ML-29B5E8.svg)](https://docs.snowflake.com/en/guides-overview-ml-functions)
+
 An end-to-end ML pipeline for detecting fraudulent credit card transactions using Snowflake, dbt, and Python.
 
 > **What this project taught me:** More features ≠ better models. The 6-feature baseline outperformed the 15-feature model, and investigating why uncovered real issues: feature leakage from point-in-time aggregation, label-derived inputs, and ID columns fed to the classifier. Those lessons — not the precision score — are the main takeaway here. Details in the [Key Learnings](#key-learnings) section.

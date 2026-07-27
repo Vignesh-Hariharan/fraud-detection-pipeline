@@ -5,5 +5,5 @@ snowflake:
   warehouse: COMPUTE_WH
   database: FRAUD_DETECTION_DB
   schema: RAW
-  role: ACCOUNTADMIN
+  role: SYSADMIN
 

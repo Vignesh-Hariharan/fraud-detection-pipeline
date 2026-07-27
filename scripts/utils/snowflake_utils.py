@@ -18,7 +18,7 @@ def get_connection(config: Dict[str, Any]) -> SnowflakeConnection:
     warehouse = snowflake_config.get('warehouse') or os.getenv('SNOWFLAKE_WAREHOUSE')
     database = snowflake_config.get('database') or os.getenv('SNOWFLAKE_DATABASE')
     schema = snowflake_config.get('schema') or os.getenv('SNOWFLAKE_SCHEMA')
-    role = snowflake_config.get('role') or os.getenv('SNOWFLAKE_ROLE', 'ACCOUNTADMIN')
+    role = snowflake_config.get('role') or os.getenv('SNOWFLAKE_ROLE', 'SYSADMIN')
     
     if not all([account, user, password]):
         raise ValueError(
