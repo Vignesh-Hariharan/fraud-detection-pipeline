@@ -14,7 +14,6 @@ from typing import Dict, Any
 import pandas as pd
 import yaml
 from dotenv import load_dotenv
-from kaggle.api.kaggle_api_extended import KaggleApi
 
 from scripts.utils.logger import get_logger
 from scripts.utils.snowflake_utils import get_connection, execute_query
@@ -36,7 +35,12 @@ DATA_DIR = Path(__file__).parent.parent / 'data'
 
 def download_kaggle_dataset() -> Path:
     logger.info(f"Downloading dataset: {KAGGLE_DATASET}")
-    
+
+    # Imported here rather than at module load: the kaggle package authenticates
+    # on import, so a top-level import breaks anything that only needs the schema
+    # helpers (tests, dbt runs) on a machine without kaggle.json.
+    from kaggle.api.kaggle_api_extended import KaggleApi
+
     try:
         api = KaggleApi()
         api.authenticate()
