@@ -1,5 +1,6 @@
 # Fraud Detection Pipeline
 
+[![CI](https://github.com/Vignesh-Hariharan/fraud-detection-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Vignesh-Hariharan/fraud-detection-pipeline/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
 [![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8.svg)](https://www.snowflake.com/)
@@ -8,7 +9,11 @@
 
 An end-to-end ML pipeline for detecting fraudulent credit card transactions using Snowflake, dbt, and Python.
 
-> **What this project taught me:** More features ≠ better models. The 6-feature baseline outperformed the 15-feature model, and investigating why uncovered real issues: feature leakage from point-in-time aggregation, label-derived inputs, and ID columns fed to the classifier. Those lessons — not the precision score — are the main takeaway here. Details in the [Key Learnings](#key-learnings) section.
+The 6-feature baseline outperformed the full 15-feature model. Digging into why surfaced
+three feature-leakage bugs — point-in-time aggregation over the full dataset, a
+label-derived input, and ID columns fed to the classifier. The [Key Learnings](#key-learnings)
+section walks through each one; the leakage analysis, not the precision number, is the point
+of the project.
 
 ## Project Context
 
@@ -314,9 +319,7 @@ The 15-feature model underperformed the 6-feature baseline. Investigating why re
 2. **Label-derived input** — `merchant_fraud_rate` is computed directly from the fraud label column across the full dataset. This means the model trained on a variable that already encodes the answer for some rows.
 3. **ID columns passed to Cortex** — training tables included transaction ID and timestamp columns, which Cortex treated as numeric inputs, adding noise.
 
-A production version would compute all aggregations point-in-time over the training window only, exclude ID columns, and compute merchant risk rates on training rows only. These are standard safeguards that this project skipped — and the model results made the gap visible.
-
-**Why this is worth showing:** Catching this kind of leakage after the fact — and being able to explain exactly *why* the simpler model won — demonstrates the diagnostic thinking that matters in production ML work.
+A production version would compute all aggregations point-in-time over the training window only, exclude ID columns, and compute merchant risk rates on training rows only. These are standard safeguards that this project skipped on the first pass — and the model comparison is what made the gap visible.
 
 ### What Worked
 - **Iterative approach**: Starting simple and adding features incrementally
