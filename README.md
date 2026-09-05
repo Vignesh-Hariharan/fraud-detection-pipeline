@@ -328,12 +328,44 @@ A production version would compute all aggregations point-in-time over the train
 - **Finding the right cutoff**: Testing different confidence thresholds for fraud flagging
 - **dbt for features**: SQL-based feature engineering is fast, readable, and testable
 
-### What I'd Do Differently
-- Compute all aggregations point-in-time using only training-window data
-- Exclude ID and timestamp columns from Cortex inputs
-- Compute `merchant_fraud_rate` from training rows only
-- Test more time windows (6h, 48h, 30d) for velocity features
-- Add multiple evaluation folds rather than a single train/test split
+### V2 — the point-in-time correct version, and what it actually changed
+
+Rather than leave the leakage as a note, [`v2/leakage_experiment.py`](v2/leakage_experiment.py)
+rebuilds the leaked features two ways on the full 1.05M-row dataset — once the
+original way (aggregates over the whole dataset) and once point-in-time (expanding
+windows that see only prior transactions) — and trains the same model on each with
+an 80/20 time-based split. It runs locally on DuckDB + scikit-learn; no Snowflake
+needed.
+
+Measured on the held-out later period, flagging the top 1% of transactions by risk:
+
+| Metric | Leaky (V1) | Point-in-time (V2) |
+| --- | ---: | ---: |
+| ROC-AUC | 0.932 | 0.924 |
+| PR-AUC | 0.471 | 0.480 |
+| Precision @ top 1% | 0.403 | 0.392 |
+| Recall @ top 1% | 0.739 | 0.717 |
+
+The leaked features give a small optimistic bump on ROC-AUC and recall — about 2
+points of recall the model would not actually hold in production — while PR-AUC is
+a wash. The effect is small here for a specific reason: `merchant_fraud_rate`
+averages the label across ~700 dense merchants, so a single row's own label moves
+its merchant's rate by ~0.07% — the leak is real but heavily diluted. On real
+transaction data with a long tail of low-volume merchants, the same leak inflates
+far more.
+
+The takeaway is the discipline, not the delta: computing `customer_avg_amount`,
+`amount_z_score`, and `merchant_fraud_rate` over prior rows only is what makes the
+reported numbers the ones you can actually reproduce in production. The velocity
+features (`txns_last_24h`, `txns_last_7d`) were already point-in-time and are left
+unchanged.
+
+Run it:
+
+```bash
+pip install duckdb scikit-learn pandas numpy
+python v2/leakage_experiment.py   # downloads the data, prints the table, writes v2/results.csv
+```
 
 ## Limitations
 
@@ -345,7 +377,9 @@ This is a portfolio project, not production-ready. Known limitations:
 4. **Simulated data** - patterns may differ from real fraud
 5. **No orchestration** - manual execution or basic scheduling
 6. **Limited testing** - happy path focused
-7. **Feature engineering gaps** - see [Key Learnings](#key-learnings) for a full breakdown of the leakage issues discovered and what a production version would do differently.
+7. **Feature engineering** - the original Snowflake features leaked; the
+   point-in-time correct rebuild and its measured impact are in
+   [Key Learnings](#key-learnings) and [`v2/`](v2/leakage_experiment.py).
 
 
 ## Security Note

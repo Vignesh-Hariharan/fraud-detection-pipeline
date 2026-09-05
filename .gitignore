@@ -76,3 +76,8 @@ QUICK_START.md
 .DS_Store
 docs/images/.DS_Store
 
+
+# v2 leakage experiment
+v2/data/
+*.mlvenv
+.mlvenv/

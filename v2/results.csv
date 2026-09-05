@@ -1,0 +1,6 @@
+metric,leaky_v1,corrected_v2
+roc_auc,0.9315,0.9240
+pr_auc,0.4707,0.4802
+precision@1%,0.4034,0.3915
+recall@1%,0.7389,0.7170
+f1@1%,0.5219,0.5065
