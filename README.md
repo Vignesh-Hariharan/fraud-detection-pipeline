@@ -10,7 +10,7 @@
 An end-to-end ML pipeline for detecting fraudulent credit card transactions using Snowflake, dbt, and Python.
 
 The 6-feature baseline outperformed the full 15-feature model. Digging into why surfaced
-three feature-leakage bugs — point-in-time aggregation over the full dataset, a
+three feature-leakage bugs: point-in-time aggregation over the full dataset, a
 label-derived input, and ID columns fed to the classifier. The [Key Learnings](#key-learnings)
 section walks through each one; the leakage analysis, not the precision number, is the point
 of the project.
@@ -95,8 +95,10 @@ See `docs/FEATURE_NOTES.md` for rationale and implementation details.
 
 - Python 3.10+
 - Snowflake account (free trial works)
-- Kaggle account
+- Kaggle account (Snowflake load only)
 - Slack workspace (optional)
+
+The V2 leakage script does not need Kaggle. It downloads `fraudTrain.csv` from HuggingFace with no login.
 
 ### 2. Installation
 
@@ -214,14 +216,11 @@ EXP3 (+ customer/time)    13          76.9%        80.2%        78.5%
 FULL (all features)       15          74.2%        76.6%        75.4%
 
 Best Model: BASELINE (6 features)
-Why: Highest F1 score + simplest (least prone to overfitting)
+
+The extra features did not help because three of them leaked (full-dataset
+aggregates, a label-derived merchant rate, ID columns into Cortex). That is
+not a lesson about overfitting. See Key Learnings.
 ```
-
-**Key Finding**: More features didn't help. The baseline model with only 6 core features outperformed the complex models:
-- Simpler is often better (avoids overfitting)
-- Feature selection matters more than quantity
-- Not all engineered features add value
-
 
 ## Project Structure
 
@@ -311,15 +310,15 @@ This demo uses batch processing on historical data. In production, you would:
 
 ## Key Learnings
 
-### The Main Finding: Why the Simpler Model Won
+### The Main Finding: Why the 15-feature model lost
 
 The 15-feature model underperformed the 6-feature baseline. Investigating why revealed three compounding problems:
 
-1. **Point-in-time leakage** — `customer_avg_amount`, `amount_z_score`, and velocity features were computed in dbt over the *full* dataset before the train/test split. Training rows could therefore see statistics that included future test-window transactions.
-2. **Label-derived input** — `merchant_fraud_rate` is computed directly from the fraud label column across the full dataset. This means the model trained on a variable that already encodes the answer for some rows.
-3. **ID columns passed to Cortex** — training tables included transaction ID and timestamp columns, which Cortex treated as numeric inputs, adding noise.
+1. **Point-in-time leakage.** `customer_avg_amount`, `amount_z_score`, and velocity features were computed in dbt over the *full* dataset before the train/test split. Training rows could therefore see statistics that included future test-window transactions.
+2. **Label-derived input.** `merchant_fraud_rate` is computed directly from the fraud label column across the full dataset. This means the model trained on a variable that already encodes the answer for some rows.
+3. **ID columns passed to Cortex.** Training tables included transaction ID and timestamp columns, which Cortex treated as numeric inputs, adding noise.
 
-A production version would compute all aggregations point-in-time over the training window only, exclude ID columns, and compute merchant risk rates on training rows only. These are standard safeguards that this project skipped on the first pass — and the model comparison is what made the gap visible.
+A production version would compute all aggregations point-in-time over the training window only, exclude ID columns, and compute merchant risk rates on training rows only. These are standard safeguards that this project skipped on the first pass, and the model comparison is what made the gap visible.
 
 ### What Worked
 - **Iterative approach**: Starting simple and adding features incrementally
@@ -328,14 +327,15 @@ A production version would compute all aggregations point-in-time over the train
 - **Finding the right cutoff**: Testing different confidence thresholds for fraud flagging
 - **dbt for features**: SQL-based feature engineering is fast, readable, and testable
 
-### V2 — the point-in-time correct version, and what it actually changed
+### V2: the point-in-time correct version, and what it actually changed
 
 Rather than leave the leakage as a note, [`v2/leakage_experiment.py`](v2/leakage_experiment.py)
-rebuilds the leaked features two ways on the full 1.05M-row dataset — once the
-original way (aggregates over the whole dataset) and once point-in-time (expanding
-windows that see only prior transactions) — and trains the same model on each with
-an 80/20 time-based split. It runs locally on DuckDB + scikit-learn; no Snowflake
-needed.
+rebuilds the leaked features two ways on 1,048,575 rows from the HuggingFace
+`fraudTrain.csv` (the Sparkov source is listed as ~1.3M; this file is what V2
+ran on): once the original way (aggregates over the whole dataset) and once
+point-in-time (expanding windows that see only prior transactions). It trains
+the same model on each with an 80/20 time-based split. It runs locally on
+DuckDB + scikit-learn; no Snowflake needed.
 
 Measured on the held-out later period, flagging the top 1% of transactions by risk:
 
@@ -346,11 +346,11 @@ Measured on the held-out later period, flagging the top 1% of transactions by ri
 | Precision @ top 1% | 0.403 | 0.392 |
 | Recall @ top 1% | 0.739 | 0.717 |
 
-The leaked features give a small optimistic bump on ROC-AUC and recall — about 2
-points of recall the model would not actually hold in production — while PR-AUC is
+The leaked features give a small optimistic bump on ROC-AUC and recall, about 2
+points of recall the model would not actually hold in production, while PR-AUC is
 a wash. The effect is small here for a specific reason: `merchant_fraud_rate`
 averages the label across ~700 dense merchants, so a single row's own label moves
-its merchant's rate by ~0.07% — the leak is real but heavily diluted. On real
+its merchant's rate by ~0.07%. The leak is real but heavily diluted. On real
 transaction data with a long tail of low-volume merchants, the same leak inflates
 far more.
 

@@ -9,11 +9,11 @@ before any train/test split:
   * merchant_fraud_rate = AVG(is_fraud)   -- computed per merchant across all
     rows, so the feature encodes the label itself, including the current row's.
 
-This script rebuilds both feature families two ways on the real 1.3M-row dataset
--- once with the leak (full-dataset aggregates) and once point-in-time (expanding
-windows that see only prior transactions) -- trains the same model on each with a
-time-based split, and reports the difference. Nothing here needs Snowflake; the
-point is to isolate and quantify the leakage.
+This script rebuilds both feature families two ways on 1,048,575 rows from the
+HuggingFace fraudTrain.csv (Sparkov is listed as ~1.3M; this is the file V2 ran):
+once with the leak (full-dataset aggregates) and once point-in-time (expanding
+windows that see only prior transactions). It trains the same model on each with a
+time-based split, and reports the difference. Nothing here needs Snowflake.
 
 Run:  python v2/leakage_experiment.py
 """
