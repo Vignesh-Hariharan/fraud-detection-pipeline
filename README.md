@@ -9,11 +9,10 @@
 
 An end-to-end ML pipeline for detecting fraudulent credit card transactions using Snowflake, dbt, and Python.
 
-The 6-feature baseline outperformed the full 15-feature model. Digging into why surfaced
-three feature-leakage bugs: point-in-time aggregation over the full dataset, a
-label-derived input, and ID columns fed to the classifier. The [Key Learnings](#key-learnings)
-section walks through each one; the leakage analysis, not the precision number, is the point
-of the project.
+The 6-feature baseline beat the 15-feature model because three features leaked:
+full-dataset aggregates, a merchant rate built from the label, and ID columns
+passed into Cortex. V2 rebuilds those aggregations over prior rows only. Walkthrough
+in [Key Learnings](#key-learnings).
 
 ## Project Context
 
@@ -194,34 +193,22 @@ python scripts/slack_alert.py --dry-run
 python scripts/slack_alert.py
 ```
 
-## Model Experiments & Performance
+## Model comparison (V1)
 
-I trained 4 different models iteratively, adding features incrementally:
-
-1. **Baseline** (6 features): Amount patterns + basic time
-2. **With Velocity** (9 features): + transaction frequency metrics
-3. **With Customer/Time** (13 features): + customer age, account age, time patterns
-4. **Full Features** (15 features): + geography, merchant risk
-
-### Results
-
-After running all 4 experiments:
+Four Cortex runs on the original dbt features. Baseline won because of leakage,
+not because six features is the right model. V2 numbers are in Key Learnings.
 
 ```
-Model                     Features    Precision    Recall       F1        
+Model                     Features    Precision    Recall       F1
 --------------------------------------------------------------------------------
-BASELINE                  6           82.9%        74.7%        78.6%     (best)
+BASELINE                  6           82.9%        74.7%        78.6%
 EXP2 (+ velocity)         9           75.5%        77.2%        76.3%
 EXP3 (+ customer/time)    13          76.9%        80.2%        78.5%
 FULL (all features)       15          74.2%        76.6%        75.4%
-
-Best Model: BASELINE (6 features)
-
-The extra features did not help because three of them leaked (full-dataset
-aggregates, a label-derived merchant rate, ID columns into Cortex). That is
-not a lesson about overfitting. See Key Learnings.
 ```
 
+Three of the extra features leaked (full-dataset aggregates, a label-derived
+merchant rate, ID columns into Cortex). See Key Learnings and V2.
 ## Project Structure
 
 ```
