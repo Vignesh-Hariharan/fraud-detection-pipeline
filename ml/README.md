@@ -15,7 +15,7 @@ Experiment 3 (13 features)
     ↓ add geography/merchant
 Full Model (15 features)
     ↓
-Compare & Select Best
+Compare, then check for leakage
 ```
 
 ## Execution Order

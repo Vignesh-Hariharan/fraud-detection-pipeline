@@ -32,3 +32,15 @@ jobs:
 
       - name: Unit tests
         run: pytest tests -q
+
+      - name: dbt deps and parse
+        working-directory: dbt_project
+        env:
+          SNOWFLAKE_ACCOUNT: ci-account
+          SNOWFLAKE_USER: ci-user
+          SNOWFLAKE_PASSWORD: ci-password
+          DBT_PROFILES_DIR: .
+        run: |
+          cp profiles.yml.example profiles.yml
+          dbt deps
+          dbt parse --profiles-dir .

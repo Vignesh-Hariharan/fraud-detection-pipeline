@@ -1,6 +1,8 @@
 # Feature Engineering Process
 
-This document explains the features engineered for the fraud detection model, based on research into common fraud detection patterns.
+Features in `int_features.sql`. `customer_avg_amount`, `amount_z_score`, and
+`merchant_fraud_rate` are computed over the full table; `merchant_fraud_rate`
+also uses the label. Point-in-time rebuild: [`v2/leakage_experiment.py`](../v2/leakage_experiment.py).
 
 ## Approach
 
