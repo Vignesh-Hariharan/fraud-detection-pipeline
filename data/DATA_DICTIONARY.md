@@ -7,7 +7,7 @@
 - **URL**: https://www.kaggle.com/datasets/kartik2112/fraud-detection
 - **License**: CC0: Public Domain
 - **Size**: ~1.3M transactions
-- **Fraud Rate**: ~0.17% (highly imbalanced)
+- **Fraud Rate**: ~0.5–0.6% (highly imbalanced)
 - **Time Period**: January 2019 - December 2020
 
 This is a simulated dataset created for fraud detection research and education. It is NOT real bank transaction data.
