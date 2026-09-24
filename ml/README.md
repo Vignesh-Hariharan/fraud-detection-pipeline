@@ -205,7 +205,7 @@ SELECT * FROM MARTS.ML_EXPERIMENTS ORDER BY experiment_date DESC;
 - Cortex ML can take 5-15 minutes depending on data size
 
 **Poor performance?**
-- Check class imbalance (should be ~0.17% fraud)
+- Check class imbalance (should be ~0.5–0.6% fraud)
 - Verify temporal split is correct (train before, test after cutoff)
 - Look at probability distributions - are they separating fraud from legit?
 - Try different thresholds - default 0.5 might not be optimal

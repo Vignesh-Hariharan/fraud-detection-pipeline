@@ -67,7 +67,7 @@ Using the **Kaggle Credit Card Fraud Detection Dataset**:
 - **Creator**: [Kartik Shenoy](https://www.kaggle.com/kartik2112)
 - **Source**: https://www.kaggle.com/datasets/kartik2112/fraud-detection
 - 1.3M transactions from 2019-2020
-- ~0.17% fraud rate (imbalanced)
+- ~0.5–0.6% fraud rate (imbalanced)
 - Simulated data for education/research
 - Generated using [Sparkov Data Generation](https://github.com/namebrandon/Sparkov_Data_Generation) tool by Brandon Harris
 
@@ -141,7 +141,7 @@ Run setup scripts in Snowflake console:
 python scripts/load_data.py
 ```
 
-Expected: ~1.3M rows loaded, fraud rate 0.17%
+Expected: ~1.3M rows loaded, fraud rate ~0.5–0.6%
 
 ### 6. Run dbt Models
 
@@ -318,8 +318,10 @@ A production version would compute all aggregations point-in-time over the train
 
 Rather than leave the leakage as a note, [`v2/leakage_experiment.py`](v2/leakage_experiment.py)
 rebuilds the leaked features two ways on 1,048,575 rows from the HuggingFace
-`fraudTrain.csv` (the Sparkov source is listed as ~1.3M; this file is what V2
-ran on): once the original way (aggregates over the whole dataset) and once
+`fraudTrain.csv`. That count is Excel's row limit; the mirror is truncated
+there, so V2 ran on the first ~1.05M rows. Both versions use the same file, so
+the comparison is like-for-like. The Sparkov source is listed as ~1.3M. Features
+are built once the original way (aggregates over the whole dataset) and once
 point-in-time (expanding windows that see only prior transactions). It trains
 the same model on each with an 80/20 time-based split. It runs locally on
 DuckDB + scikit-learn; no Snowflake needed.
